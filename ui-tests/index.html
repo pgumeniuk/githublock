@@ -6,6 +6,12 @@
 <script src="https://code.jquery.com/jquery-3.2.0.min.js"></script>
 
 <script type="text/javascript" >
+  function sha512(str) {
+    return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
+      return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('');
+    });
+  }
+
   function onPass(event) {
     event = event || window.event;
     if (event.keyCode != 13) {
@@ -13,7 +19,7 @@
     }
 
     var pass = $("#pass").val();
-    var url = window.location.href + hex_sha512(pass) + "/index.html";
+    var url = window.location.href + sha512(pass) + "/index.html";
     $("#status").text("...");
 
     $.ajax({
