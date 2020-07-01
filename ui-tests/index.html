@@ -1,60 +1,131 @@
+
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta charset="UTF-8"> 
-<script src="https://code.jquery.com/jquery-3.2.0.min.js"></script>
+<title></title>
 
-<script type="text/javascript" >
-  function sha512(str) {
-    return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
-      return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('');
-    });
-  }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  function onPass(event) {
-    event = event || window.event;
-    if (event.keyCode != 13) {
-      return;
-    }
-
-    var pass = $("#pass").val();
-    var url = window.location.href + sha512(pass) + "/index.html";
-    $("#status").text("...");
-
-    $.ajax({
-      type: 'HEAD',
-      url: url,
-      success: function() {
-        var iframe = $("#iframe");
-        iframe.css("display", "inherit");
-        iframe.attr("src", url);
-        $("#prompt").css("display", "none");
-      },
-      error: function() {
-        $("#status").text("ERROR!");
-      }
-    });
-  }
-</script>
-
-<style>
-  body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-  #content { position:absolute; left: 0; right: 0; bottom: 0; top: 0px; }
-  #iframe { display: none; }
-  #prompt { margin-left: 1%; }
-</style>
 </head>
 
+<style>
+
+body {
+	color: #333;
+}
+
+.box {
+	border-radius: 3px;
+	background: rgba(101, 101, 101, 0.7); margin: auto; padding: 12px;
+}
+
+.lightbox {
+	zoom: 1.5;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(10, 10, 10, 0.8);
+	text-align: center;
+	margin: auto;
+
+}
+
+div.horizontal {
+	display: flex;
+	justify-content: center;
+	height: 100%;
+}
+
+div.vertical {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 100%;
+}
+
+::-webkit-input-placeholder {
+   color: #955;
+   text-align: center;
+}
+
+::-moz-placeholder {
+   color: #955;
+   text-align: center;
+}
+
+:-ms-input-placeholder {
+   color: #955;
+   text-align: center;
+}
+
+</style>
+
 <body>
-  <div id="content">
-    <div id="prompt">
-      <p>
-      Enter password: 
-      <input type="password" onkeyup="onPass(event)" id="pass">
-      <span id="status"></span>
-      </p>
-    </div>
-    <iframe id="iframe" width="100%" height="100%" frameborder="0" />
-  </div>
+
+	<div id="loginbox" class="lightbox" >
+		<div class="horizontal">
+			<div class="vertical">
+				<div class="box">
+					<input style="margin: 16px; text-align: center;" id="password" type="password" placeholder="password" /> <br />
+					<button id="loginbutton" type="button">Enter</button>
+					<p id="wrongPassword" style="display: none">wrong password</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+
+	 <script type="text/javascript" src="https://rawcdn.githack.com/chrisveness/crypto/7067ee62f18c76dd4a9d372a00e647205460b62b/sha1.js"></script>
+
+	<script type="text/javascript">
+	"use strict";
+
+
+	function loadPage(pwd) {
+
+		var hash= pwd;
+		hash= Sha1.hash(pwd);
+		var url= hash + "/index.html";
+
+		$.ajax({
+			url : url,
+			dataType : "html",
+			success : function(data) {
+
+				window.location= url;
+
+			},
+			error : function(xhr, ajaxOptions, thrownError) {
+
+
+				parent.location.hash= hash;
+
+				//$("#wrongPassword").show();
+				$("#password").attr("placeholder","wrong password");
+				$("#password").val("");
+			}
+		});
+	}
+
+
+	$("#loginbutton").on("click", function() {
+		loadPage($("#password").val());
+	});
+	$("#password").keypress(function(e) {
+		if (e.which == 13) {
+
+			loadPage($("#password").val());
+		}
+	});
+	$("#password").focus();
+
+	</script>
+
 </body>
 </html>
